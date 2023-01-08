@@ -8,7 +8,9 @@ minetest.register_on_leaveplayer(function (player)
     player_moods[player:get_player_name()] = nil
 end)
 
-minetest.register_globalstep(function (dtime)
+local function handle_player_moods()
+    minetest.after(1, handle_player_moods)
+
     for _, player in ipairs(minetest.get_connected_players()) do
         local player_name = player:get_player_name()
         local player_pos = player:get_pos()
@@ -19,22 +21,24 @@ minetest.register_globalstep(function (dtime)
             local current_mood = player_moods[player_name]
 
             if light ~= nil and light < 7 then
-                player_moods[player_name] = current_mood + (7 - light) / (dtime * 1000)
+                player_moods[player_name] = current_mood + (7 - light)
             else
-                player_moods[player_name] = current_mood - 0.2
+                player_moods[player_name] = current_mood - 2
             end
         else
             local current_mood = player_moods[player_name]
 
-            player_moods[player_name] = current_mood - 0.2
+            player_moods[player_name] = current_mood - 2
         end
 
         if player_moods[player_name] > 100 then
             minetest.sound_play({to_player=player_name, name='cave'})
-
             player_moods[player_name] = 0
+        
         elseif player_moods[player_name] < 0 then
             player_moods[player_name] = 0
         end
     end
-end)
+end
+
+minetest.after(1, handle_player_moods)
