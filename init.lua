@@ -21,12 +21,12 @@ minetest.register_globalstep(function (dtime)
             if light ~= nil and light < 7 then
                 player_moods[player_name] = current_mood + (7 - light) / (dtime * 1000)
             else
-                player_moods[player_name] = current_mood - 0.01
+                player_moods[player_name] = current_mood - 0.2
             end
         else
             local current_mood = player_moods[player_name]
 
-            player_moods[player_name] = current_mood - 0.4
+            player_moods[player_name] = current_mood - 0.2
         end
 
         if player_moods[player_name] > 100 then
