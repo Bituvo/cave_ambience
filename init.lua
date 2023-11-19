@@ -1,44 +1,40 @@
-local player_moods = {}
-
 minetest.register_on_joinplayer(function (player)
-    player_moods[player:get_player_name()] = 0
-end)
-
-minetest.register_on_leaveplayer(function (player)
-    player_moods[player:get_player_name()] = nil
+    local meta = player:get_meta()
+    meta:set_int("mood", 0)
 end)
 
 local function handle_player_moods()
-    minetest.after(1, handle_player_moods)
-
     for _, player in ipairs(minetest.get_connected_players()) do
-        local player_name = player:get_player_name()
-        local player_pos = player:get_pos()
-        player_pos.y = player_pos.y + 1
+        local meta = player:get_meta()
+        local name = player:get_player_name()
+        local pos = vector.offset(player:get_pos(), 0, 1, 0)
+        local mood = meta:get_int("mood")
 
-        if minetest.get_node_light(player_pos, 0.5) ~= 15 then
-            local light = minetest.get_node_light(player_pos)
-            local current_mood = player_moods[player_name]
+        if minetest.get_node_light(pos, 0.5) < 15 then
+            -- Player is underground
+            local light = minetest.get_node_light(pos)
 
-            if light ~= nil and light < 7 then
-                player_moods[player_name] = current_mood + (7 - light)
+            if light and light <= 6 then
+                mood = mood + (7 - light)
             else
-                player_moods[player_name] = current_mood - 2
+                mood = mood - 2
             end
         else
-            local current_mood = player_moods[player_name]
-
-            player_moods[player_name] = current_mood - 2
+            mood = mood - 2
         end
 
-        if player_moods[player_name] > 100 then
-            minetest.sound_play({to_player=player_name, name='cave'})
-            player_moods[player_name] = 0
+        if mood > 100 then
+            minetest.sound_play({to_player = name, name = "cave"})
+            mood = 0
         
-        elseif player_moods[player_name] < 0 then
-            player_moods[player_name] = 0
+        elseif mood < 0 then
+            mood = 0
         end
+
+        meta:set_int("mood", mood)
     end
+
+    minetest.after(1, handle_player_moods)
 end
 
 minetest.after(1, handle_player_moods)
