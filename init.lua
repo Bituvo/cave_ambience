@@ -9,8 +9,9 @@ local function handle_player_moods()
         local name = player:get_player_name()
         local pos = vector.offset(player:get_pos(), 0, 1, 0)
         local mood = meta:get_int("mood")
+        local maximum_node_light = minetest.get_node_light(pos, 0.5)
 
-        if minetest.get_node_light(pos, 0.5) < 15 then
+        if maximum_node_light and maximum_node_light < 15 then
             -- Player is underground
             local light = minetest.get_node_light(pos)
 
